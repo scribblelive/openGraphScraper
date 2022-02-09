@@ -1,20 +1,17 @@
 {
   "extends": [
-    "eslint-config-airbnb-es5"
+    "airbnb-base",
+    "plugin:promise/recommended"
   ],
-
-  "globals": {
-    "Promise"    : false,
-    /* MOCHA */
-    "describe"   : false,
-    "it"         : false,
-    "before"     : false,
-    "beforeEach" : false,
-    "after"      : false,
-    "afterEach"  : false
-  },
-
+  "plugins": [
+    "promise"
+  ],
   "rules": {
-    "func-names": 0
+    "max-len": ["error", {
+      "code": 120,
+      "ignoreStrings": true,
+      "ignoreTrailingComments": true
+    }],
+    "no-param-reassign": "off"
   }
 }

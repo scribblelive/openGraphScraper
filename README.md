@@ -1,151 +1,157 @@
-openGraphScraper
-==============
-[![Build Status](https://travis-ci.org/jshemas/openGraphScraper.png?branch=master)](https://travis-ci.org/jshemas/openGraphScraper)
+# openGraphScraper
+
+[![Node.js CI](https://github.com/jshemas/openGraphScraper/workflows/Node.js%20CI/badge.svg?branch=master)](https://github.com/jshemas/openGraphScraper/actions?query=branch%3Amaster)
 [![Known Vulnerabilities](https://snyk.io/test/github/jshemas/openGraphScraper/badge.svg)](https://snyk.io/test/github/jshemas/openGraphScraper)
-[![Coverage Status](https://coveralls.io/repos/github/jshemas/openGraphScraper/badge.svg?branch=master)](https://coveralls.io/github/jshemas/openGraphScraper?branch=master)
 
-A simple node module for scraping Open Graph and Twitter Card info off a site.
+A simple node module for scraping Open Graph and Twitter Card info off a site. For browser usage, we recommend using [ky](https://github.com/sindresorhus/ky) to make the requests(or a backend service) then pass in the `html` into `open-graph-scraper` using the `html` option.
 
-### Installation
+## Installation
+
+```bash
+npm install open-graph-scraper --save
 ```
-npm install open-graph-scraper
-```
 
-### Usage
+## Usage
+
+Callback Example:
+
 ```javascript
-var ogs = require('open-graph-scraper');
-var options = {'url': 'http://ogp.me/'};
-ogs(options, function (error, results) {
-  console.log('error:', error); // This is returns true or false. True if there was a error. The error it self is inside the results object.
-  console.log('results:', results);
-});
-
-```
-
-You can set a timeout flag like... Example four seconds:
-```javascript
-var ogs = require('open-graph-scraper');
-var options = {'url': 'http://ogp.me/', 'timeout': 4000};
-ogs(options, function (error, results) {
-  console.log('error:', error); // This is returns true or false. True if there was a error. The error it self is inside the results object.
-  console.log('results:', results);
-});
-```
-
-You can set custom headers. For example scraping data in a specific language:
-```javascript
-var ogs = require('open-graph-scraper');
-var options = {'url': 'http://ogp.me/', 'headers': { 'accept-language': 'en' }};
-ogs(options, function (error, results) {
-  console.log('error:', error); // This is returns true or false. True if there was a error. The error it self is inside the results object.
-  console.log('results:', results);
-});
-```
-
-You can set a blacklist. For example if you want to black list youtube.com:
-```javascript
-var ogs = require('open-graph-scraper');
-var options = {'url': 'http://ogp.me/', 'blacklist': ['youtube.com']};
-ogs(options, function (error, results) {
-  console.log('error:', error); // This is returns true or false. True if there was a error. The error it self is inside the results object.
-  console.log('results:', results);
-});
-```
-
-Example of setting encoding(default is `null`):
-```javascript
-var ogs = require('open-graph-scraper');
-var options = {'url': 'http://ogp.me/', 'encoding': 'utf8'};
-ogs(options, function (error, results) {
-  console.log('error:', error); // This is returns true or false. True if there was a error. The error it self is inside the results object.
-  console.log('results:', results);
-});
-```
-
-There is also a followAllRedirects(default is `true`) and a maxRedirects(default is `20`) option:
-```javascript
-var ogs = require('open-graph-scraper');
-var options = {'url': 'http://ogp.me/', 'followAllRedirects': true, 'maxRedirects': 20};
-ogs(options, function (error, results) {
-  console.log('error:', error); // This is returns true or false. True if there was a error. The error it self is inside the results object.
-  console.log('results:', results);
-});
-```
-
-If you would like the response of the page you scraped you can grab it as the third param:
-```javascript
-var ogs = require('open-graph-scraper');
-var options = {'url': 'http://ogp.me/', 'timeout': 4000};
-ogs(options, function (error, results, response) {
-  console.log('error:', error); // This is returns true or false. True if there was a error. The error it self is inside the results object.
-  console.log('results:', results);
-  console.log('response:', response); // The whole Response Object
+const ogs = require('open-graph-scraper');
+const options = { url: 'http://ogp.me/' };
+ogs(options, (error, results, response) => {
+  console.log('error:', error); // This returns true or false. True if there was an error. The error itself is inside the results object.
+  console.log('results:', results); // This contains all of the Open Graph results
+  console.log('response:', response); // This contains the HTML of page
 });
 ```
 
 Promise Example:
+
 ```javascript
-var ogs = require('open-graph-scraper');
-var options = {'url': 'http://ogp.me/'};
+const ogs = require('open-graph-scraper');
+const options = { url: 'http://ogp.me/' };
 ogs(options)
-  .then(function (result) {
-    console.log('result:', result);
+  .then((data) => {
+    const { error, result, response } = data;
+    console.log('error:', error);  // This returns true or false. True if there was an error. The error itself is inside the results object.
+    console.log('result:', result); // This contains all of the Open Graph results
+    console.log('response:', response); // This contains the HTML of page
   })
-  .catch(function (error) {
-    console.log('error:', error);
-  });
 ```
 
-Note: By default if page dose not have something like a `og:title` tag it will try and look for it in other places and return that. If you truely only want open graph info you can use the option `onlyGetOpenGraphInfo` and set it to `true`.
+## Results JSON
 
-It's possible to pass in an HTML string instead of a URL. There won't be a resonse object.
-```javascript
-var htmlString = /* html string goes here */;
-var ogs = require('open-graph-scraper');
-var options = {'html': htmlString};
-ogs(options, function (error, results) {
-  console.log('error:', error); // This is returns true or false. True if there was a error. The error it self is inside the results object.
-  console.log('results:', results);
-});
-```
-
-
-### Results JSON
 Check the return for a ```success``` flag. If success is set to true, then the url input was valid. Otherwise it will be set to false. The above example will return something like...
+
 ```javascript
 {
-  data: {
-    ogTitle: 'Open Graph protocol',
-    ogType: 'website',
-    ogUrl: 'http://ogp.me/',
-    ogDescription: 'The Open Graph protocol enables any web page to become a rich object in a social graph.',
-    ogImage: {
-      url: 'http://ogp.me/logo.png',
-      width: '300',
-      height: '300',
-      type: 'image/png'
-    }
+  ogTitle: 'Open Graph protocol',
+  ogType: 'website',
+  ogUrl: 'http://ogp.me/',
+  ogDescription: 'The Open Graph protocol enables any web page to become a rich object in a social graph.',
+  ogImage: {
+    url: 'http://ogp.me/logo.png',
+    width: '300',
+    height: '300',
+    type: 'image/png'
   },
+  requestUrl: 'http://ogp.me/',
   success: true
 }
 ```
 
-### Features
-- This will also scrape twitter info!
-- There is a `allMedia` option you can set to `true` if you want all the images/videos send back.
+## Options
 
-### Tests
-You have to have mocha running. To install it run...
-```
-npm install mocha -g
-```
-Then you can run the tests by turning on the server and run...
-```
-mocha tests/
+| Name                 | Info                                                                       | Default Value | Required |
+|----------------------|----------------------------------------------------------------------------|---------------|----------|
+| url                  | URL of the site.                                                           |               | x        |
+| timeout              | Timeout of the request                                                     | 2000 ms       |          |
+| html                 | You can pass in an HTML string to run ogs on it. (use without options.url) |               |          |
+| blacklist            | Pass in an array of sites you don't want ogs to run on.                    | []            |          |
+| onlyGetOpenGraphInfo | Only fetch open graph info and don't fall back on anything else.           | false         |          |
+| ogImageFallback      | Fetch other images if no open graph ones are found.                        | true          |          |
+| customMetaTags       | Here you can define custom meta tags you want to scrape.                   | []            |          |
+| allMedia             | By default, OGS will only send back the first image/video it finds         | false         |          |
+| decompress           | Set the accept-encoding to gzip/deflate                                    | true          |          |
+| followRedirect       | Defines if redirect responses should be followed automatically.            | true          |          |
+| maxRedirects         | Max number of redirects ogs will follow.                                   | 10            |          |
+| retry                | Number of times ogs will retry the request.                                | 2             |          |
+| headers              | An object containing request headers. Useful for setting the user-agent    | {}            |          |
+| peekSize             | Sets the peekSize for the request                                          | 1024          |          |
+| agent                | Used for Proxies, Look below for notes on how to use.                      | null          |          |
+| downloadLimit        | Maximum size of the content downloaded from the server, in bytes           | 1000000 (1MB) |          |
+| urlValidatorSettings | Sets the options used by validator.js for testing the URL                  | [Here](https://github.com/jshemas/openGraphScraper/blob/master/lib/openGraphScraper.js#L21-L36)          |          |
+
+Note: `open-graph-scraper` uses [got](https://github.com/sindresorhus/got) for requests and most of [got's options](https://github.com/sindresorhus/got#options) should work as `open-graph-scraper` options.
+
+## Custom Meta Tag Example
+
+```javascript
+const ogs = require('open-graph-scraper');
+const options = {
+  url: 'https://github.com/jshemas/openGraphScraper',
+  customMetaTags: [{
+    multiple: false, // is there more than one of these tags on a page (normally this is false)
+    property: 'hostname', // meta tag name/property attribute
+    fieldName: 'hostnameMetaTag', // name of the result variable
+  }],
+};
+ogs(options)
+  .then((data) => {
+    const { error, result, response } = data;
+    console.log('hostnameMetaTag:', result.hostnameMetaTag); // hostnameMetaTag: github.com
+  })
 ```
 
-### Make
-This will install the all of the dependencies, then run the tests
+## Proxy Example
+
+[Look here](https://github.com/sindresorhus/got#proxies) for more info on how to use proxies.
+
+```javascript
+const ogs = require('open-graph-scraper');
+const tunnel = require('tunnel');
+const options = {
+  url: 'https://whatismyipaddress.com/',
+  timeout: 15000,
+  agent: {
+    // setting proxy agent for https requests
+    https: tunnel.httpsOverHttp({
+      // test proxies can be found here: https://hidemy.name/en/proxy-list/?country=US&type=h#list or http://free-proxy.cz/en/proxylist/country/US/https/ping/all
+      proxy: {
+        host: 'proxy_ip',
+        port: proxyPort,
+        rejectUnauthorized: false,
+      }
+    })
+  }
+};
+ogs(options)
+  .then((data) => {
+    const { error, result, response } = data;
+    console.log('response:', response); // you should see the proxy IP in here
+  })
 ```
-make test
+
+## User Agent Example
+
+```javascript
+const ogs = require("open-graph-scraper");
+const options = {
+  url: "https://twitter.com/elonmusk/status/1364826301027115008",
+  headers: {
+    "user-agent": "Googlebot/2.1 (+http://www.google.com/bot.html)",
+  },
+};
+ogs(options, (error, results) => {
+  console.log("error:", error); // This returns true or false. True if there was an error. The error itself is inside the results object.
+  console.log("results:", results); // This contains all of the Open Graph results
+});
+```
+
+## Tests
+
+Then you can run the tests by running...
+
+```bash
+npm run test
 ```
